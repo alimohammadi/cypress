@@ -1,17 +1,22 @@
-describe("contact form", () => {
-  it("should submit the form", () => {
-    cy.visit("http://localhost:5173/about");
-    cy.get("[data-cy='contact-input-message']").type("hellooooo");
-    cy.get("[data-cy='contact-input-name']").type("My Name");
+/// <reference types="Cypress" />
 
-    cy.get("[data-cy='contact-btn-submit']").then((el) => {
+describe("contact form", () => {
+  beforeEach(() => {
+    cy.visit("/about");
+  });
+
+  it("should submit the form", () => {
+    cy.getById("contact-input-message").type("hellooooo");
+    cy.getById("contact-input-name").type("My Name");
+
+    cy.getById("contact-btn-submit").then((el) => {
       expect(el.attr("disabled")).to.be.undefined;
       expect(el.text()).to.eq("Send Message");
     });
 
-    cy.get("[data-cy='contact-input-email']").type("test@example.com{enter}");
+    cy.getById("contact-input-email").type("test@example.com{enter}");
 
-    cy.get("[data-cy='contact-btn-submit']").as("submitBtn");
+    cy.getById("contact-btn-submit").as("submitBtn");
     cy.get("@submitBtn").contains("Send Message");
     cy.get("@submitBtn").click();
     cy.get("@submitBtn").contains("Sending...");
@@ -19,17 +24,19 @@ describe("contact form", () => {
   });
 
   it("should validate the form input", () => {
-    cy.visit("http://localhost:5173/about");
-    cy.get("[data-cy='contact-btn-submit']").click();
-    cy.get("[data-cy='contact-btn-submit']").then((el) => {
+    cy.getById("contact-btn-submit").click();
+    cy.getById("contact-btn-submit").then((el) => {
       expect(el).to.not.have.attr("disabled");
-      expect(el.text()).to.not.equal("Sending...")
+      expect(el.text()).to.not.equal("Sending...");
     });
-    cy.get("[data-cy='contact-btn-submit']").contains("Send Message");
+    cy.getById("contact-btn-submit").contains("Send Message");
 
-    cy.get("[data-cy='contact-input-message']").blur()
-    cy.get("[data-cy='contact-input-message']").parent().then(el=>{
-        expect(el.attr("class")).to.contains("invalid")
-    })
+    cy.getById("contact-input-message").as("msgInput");
+    cy.get("@msgInput").blur();
+    cy.get("@msgInput")
+      .parent()
+      .then((el) => {
+        expect(el.attr("class")).to.contains("invalid");
+      });
   });
 });
